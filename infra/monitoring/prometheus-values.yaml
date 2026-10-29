@@ -1,0 +1,51 @@
+alertmanager:
+  enabled: false
+kube-state-metrics:
+  enabled: false
+prometheus-node-exporter:
+  enabled: false
+prometheus-pushgateway:
+  enabled: false
+
+server:
+  persistentVolume:
+    enabled: false
+  retention: 6h
+  global:
+    scrape_interval: 15s
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+scrapeConfigs: null
+
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      - job_name: prometheus
+        static_configs:
+          - targets: ["localhost:9090"]
+
+      - job_name: hello-joker
+        metrics_path: /metrics
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: ["ml-platform-gitops"]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: hello-joker-gitops
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_container_port_number]
+            regex: "8083"
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_phase]
+            regex: Running
+            action: keep
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod

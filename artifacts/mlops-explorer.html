@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>피처에서 배치 추론까지 · MLOps 실습 탐색</title>
+<style>
+:root{color-scheme:light dark;--bg:#fcfaf7;--fg:#24202d;--sub:#60586a;--line:#ded7e5;--purple:#6c36ad;--orange:#b95112;--soft:#eee6f7;--surface:#fff;--ok:#187445}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,sans-serif}main{max-width:1080px;margin:auto;padding:32px 24px 56px}h1{font-size:clamp(1.7rem,5vw,2.6rem);line-height:1.25;letter-spacing:-.04em}h2{font-size:1.35rem;margin-top:0}h3{font-size:1.05rem}p{margin:.5em 0 1em}.intro{max-width:780px;color:var(--sub)}.eyebrow{color:var(--orange);font-weight:700;font-size:.85rem}.tabs{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:12px 0 18px;margin:24px 0}button,select,input{font:inherit}button{border:1px solid var(--line);border-radius:8px;padding:9px 15px;color:var(--fg);background:var(--surface);cursor:pointer}button[aria-selected=true],button.primary{background:var(--purple);color:white;border-color:var(--purple)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--orange);outline-offset:3px}section[hidden]{display:none}.grid{display:grid;grid-template-columns:1.1fr 1fr;gap:32px}.field{display:block;margin:16px 0}select{max-width:100%;padding:8px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px}input[type=range]{width:100%;accent-color:var(--purple)}.events{list-style:none;padding:0;border-left:3px solid var(--line)}.events li{padding:10px 16px;margin-bottom:8px}.events li.selected{border-left:4px solid var(--orange);margin-left:-3px;background:var(--soft)}.answer{padding:16px 0;border-top:1px solid var(--line);color:var(--purple);font-weight:650}.muted,small{color:var(--sub)}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}.step{text-align:left;min-width:0;border-top:4px solid var(--line)}.step strong,.step span{display:block}.step.done{border-top-color:var(--ok)}.step.active{border-top-color:var(--orange);background:var(--soft)}.actions{display:flex;gap:10px;flex-wrap:wrap}.status{padding:12px 0;min-height:60px}code{font-size:.9em;overflow-wrap:anywhere}table{border-collapse:collapse;width:100%;font-size:.93rem}td,th{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--purple)}.table-wrap{overflow-x:auto}details{margin:20px 0}summary{cursor:pointer;color:var(--purple)}a{color:var(--purple)}footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:.85rem;color:var(--sub)}@media(max-width:660px){main{padding:20px 16px}.grid,.flow{grid-template-columns:1fr}.tabs button{flex:1}.step{min-height:85px}}@media(prefers-color-scheme:dark){:root{--bg:#19161e;--fg:#f2edf7;--sub:#c4b9cf;--line:#49404f;--purple:#c6a2fa;--orange:#ffaf75;--soft:#33253f;--surface:#251f2c;--ok:#70c79c}button[aria-selected=true],button.primary{background:#7143a3;color:#fff;border-color:#7143a3}}@media print{.tabs,.actions,input,select{display:none}section[hidden]{display:block}section{margin-bottom:40px}}
+</style>
+</head>
+<body><main>
+<div class="eyebrow">2주차 · 개념을 실제 흐름에 연결하기</div>
+<h1>피처는 어디서 오고,<br>예측은 어떻게 저장될까?</h1>
+<p class="intro">Feast의 시점 조회, KFP의 작업 연결, S3 저장소의 역할을 직접 바꾸며 확인해 보세요. 아래 조작은 설명용이며 실제 서버나 모델을 실행하지 않습니다.</p>
+<nav class="tabs" aria-label="설명 선택" role="tablist">
+<button type="button" id="tab-feast" role="tab" aria-selected="true" aria-controls="feast">Feast · 시점과 적재</button>
+<button type="button" id="tab-kfp" role="tab" aria-selected="false" aria-controls="kfp">KFP · 세 단계</button>
+<button type="button" id="tab-storage" role="tab" aria-selected="false" aria-controls="storage">S3 · 저장소 비교</button>
+</nav>
+<section id="feast" role="tabpanel" aria-labelledby="tab-feast">
+<h2>Feast: 예측 시점에 알 수 있었던 값만 고르기</h2>
+<div class="grid"><div>
+<p>예시 피처는 사용자의 학력이에요. 원본 Adult 실습의 실제 변화 이력이 아닌 <strong>설명용 가상 이력</strong>입니다.</p>
+<ol class="events"><li data-minute="0">09:00 · HS-grad</li><li data-minute="60">10:00 · Bachelors</li><li data-minute="120">11:00 · Masters</li></ol>
+</div><div>
+<label class="field">조회 방식<br><select id="query-mode"><option value="historical">과거 조회 · 예측 시점 기준</option><option value="online">온라인 조회 · Redis에 적재한 최신 값</option></select></label>
+<label class="field" for="query-time">예측 기준 시각: <output id="time-label">10:30</output><input type="range" id="query-time" min="-1" max="150" value="90" aria-label="예측 기준 시각"></label>
+<label class="field"><input type="checkbox" id="materialized" checked> 11시까지의 피처를 Redis에 적재한 상태</label>
+<div class="answer" id="feature-answer" aria-live="polite"></div>
+<p class="muted" id="feature-why"></p>
+</div></div>
+<details><summary>실습에서는 어떻게 적용했나요?</summary><p>실제 실습에서는 사용자 ID와 기준 시각으로 Parquet 또는 S3에서 과거 피처를 조회했어요. 온라인 조회는 materialization으로 Redis에 적재한 뒤 값을 가져왔고, 이번 배치 추론은 과거 조회를 사용했어요.</p></details>
+</section>
+<section id="kfp" role="tabpanel" aria-labelledby="tab-kfp" hidden>
+<h2>KFP: 출력이 준비돼야 다음 작업이 시작돼요</h2>
+<p>한 실행의 S3 경로를 출력 파라미터로 넘겨 세 작업을 연결했어요. 파일 자체는 S3에 있고 KFP는 실행 순서를 관리합니다.</p>
+<div class="flow" aria-label="배치 추론 DAG">
+<button class="step active" type="button" data-step="0"><strong>1. Feast 조회</strong><span>사용자 3명 → 피처 8개</span></button>
+<button class="step" type="button" data-step="1"><strong>2. MLflow 추론</strong><span>모델·열 순서 → 예측</span></button>
+<button class="step" type="button" data-step="2"><strong>3. S3 저장</strong><span>3행 저장 → 재읽기 비교</span></button>
+</div>
+<div class="actions"><button class="primary" id="next-step" type="button">다음 단계 보기</button><button id="reset-step" type="button">처음으로</button></div>
+<div class="status" id="pipeline-status" aria-live="polite"></div>
+<code id="pipeline-path"></code>
+<details><summary>실제로 확인한 결과</summary><p>사용자가 실행한 통합 Run의 상태가 SUCCEEDED였어요. 모델 파일 8개의 SHA-256 검사, Pod의 모델 로드·Feast 조회는 별도로 확인했고, 새로운 PC 전체 설치 검증과는 구분해 기록했어요.</p></details>
+</section>
+<section id="storage" role="tabpanel" aria-labelledby="tab-storage" hidden>
+<h2>S3: 같은 API, 다른 저장 구조</h2>
+<label class="field">저장소 선택<br><select id="storage-kind"><option>SeaweedFS</option><option>Garage</option><option>VersityGW</option></select></label>
+<p id="storage-definition"></p><code id="storage-route"></code>
+<h3>이번에 실제 검사한 파일</h3>
+<div class="table-wrap"><table><thead><tr><th>파일</th><th>크기</th><th>세 저장소에서 확인</th></tr></thead><tbody>
+<tr><td>JSON 연결 예시</td><td>76 바이트</td><td>저장·읽기·HEAD·목록 일치</td></tr>
+<tr><td>demographic Parquet</td><td>1,440,643 바이트</td><td>전체 내용 일치</td></tr>
+<tr><td>등록 모델 파일</td><td>8,291 바이트</td><td>전체 내용 일치</td></tr>
+</tbody></table></div>
+<p class="muted">에이전트가 실행한 3개 저장소 × 3개 파일 검사입니다. 속도 순위·운영 성능·고가용성·S3 전체 API 호환성을 측정한 결과는 아니에요.</p>
+<details><summary>VersityGW의 파일과 S3는 어떻게 연결됐나요?</summary><p>전용 테스트 폴더에서 먼저 만든 파일을 S3로 읽었고, S3로 올린 JSON이 실제 디렉터리에 생겨 같은 내용인지 확인했어요. 개인 파일 서버나 기존 업무 파일은 사용하지 않았어요.</p></details>
+</section>
+<footer><a href="../README.md">저장소 안내</a> · <a href="../docs/verification.md">검증 범위</a> · 설명용 조작과 실제 실행 증거를 구분합니다.</footer>
+</main>
+<script>
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function chooseTab(tab){tabs.forEach(t=>{const active=t===tab;t.setAttribute('aria-selected',String(active));document.getElementById(t.getAttribute('aria-controls')).hidden=!active;});}
+tabs.forEach((t,i)=>{t.addEventListener('click',()=>chooseTab(t));t.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const n=(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;chooseTab(tabs[n]);tabs[n].focus();}});});
+const events=[{minute:0,value:'HS-grad'},{minute:60,value:'Bachelors'},{minute:120,value:'Masters'}];
+function feature(){const minute=Number(document.getElementById('query-time').value);const total=540+minute;document.getElementById('time-label').textContent=String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');const online=document.getElementById('query-mode').value==='online';const ready=document.getElementById('materialized').checked;const match=online?(ready?events[2]:null):events.filter(x=>x.minute<=minute).at(-1);document.getElementById('feature-answer').textContent=match?'조회 결과: '+match.value:'조회 결과: 값 없음';document.getElementById('feature-why').textContent=online?(ready?'온라인 조회는 예측 시각으로 과거를 복원하지 않고, 현재 적재된 최신 값을 가져와요.':'원본 파일에 값이 있어도 아직 Redis에 적재하지 않으면 온라인에서 조회되지 않아요.'):'기준 시각보다 미래인 값은 제외하고, 그때까지 존재한 가장 최근 값을 선택해요.';document.querySelectorAll('.events li').forEach((el,i)=>el.classList.toggle('selected',Boolean(match&&events[i]===match)));}
+['query-time','query-mode','materialized'].forEach(id=>document.getElementById(id).addEventListener('input',feature));feature();
+let progress=0;const messages=['시작 전: 먼저 사용자·시점으로 피처를 조회해요.','Feast 조회 완료: 3명 × 8개 피처를 중간 파일로 저장했어요.','모델 추론 완료: 학습 때의 열 순서와 전처리를 적용해 예측했어요.','최종 저장 완료: 3행을 저장하고 다시 읽어 내용이 같은지 확인했어요.'];function pipeline(){document.querySelectorAll('.step').forEach((el,i)=>{el.classList.toggle('done',i<progress);el.classList.toggle('active',i===progress);});document.getElementById('pipeline-status').textContent=messages[progress];document.getElementById('pipeline-path').textContent=['','실행경로/intermediate/features.csv','실행경로/intermediate/predictions.csv','실행경로/results/predictions.csv'][progress];document.getElementById('next-step').disabled=progress===3;}
+document.getElementById('next-step').onclick=()=>{progress=Math.min(3,progress+1);pipeline();};document.getElementById('reset-step').onclick=()=>{progress=0;pipeline();};document.querySelectorAll('.step').forEach(el=>el.onclick=()=>{progress=Number(el.dataset.step)+1;pipeline();});pipeline();
+const stores={SeaweedFS:['분산 파일·객체 저장소예요. 이번에는 피처 파일·레지스트리·모델을 S3로 보관했어요.','클라이언트 → SeaweedFS S3 API :8333 → 저장소'],Garage:['자체 운영용 분산 객체 저장소예요. 이번에는 단일 노드로 같은 S3 파일 왕복을 비교했어요.','클라이언트 → Garage S3 API :3900 → Garage 데이터·메타데이터'],VersityGW:['기존 파일 저장소 앞에 S3 API를 붙이는 게이트웨이예요. 이번에는 파일과 S3의 양방향 접근을 확인했어요.','클라이언트 → VersityGW :7070 → POSIX 디렉터리/버킷/키']};function storage(){const data=stores[document.getElementById('storage-kind').value];document.getElementById('storage-definition').textContent=data[0];document.getElementById('storage-route').textContent=data[1];}document.getElementById('storage-kind').onchange=storage;storage();
+</script></body></html>

@@ -1,0 +1,25 @@
+services:
+  runner:
+    image: docker.io/gitea/runner:5
+    container_name: ml-platform-runner
+    restart: unless-stopped
+    environment:
+      GITEA_INSTANCE_URL: http://gitea:3000
+      GITEA_RUNNER_REGISTRATION_TOKEN_FILE: /run/secrets/registration-token
+      GITEA_RUNNER_NAME: ml-platform-runner
+      GITEA_RUNNER_LABELS: lab:docker://ml-platform-ci:py311-docker29
+      CONFIG_FILE: /config.yaml
+    volumes:
+      - runner-data:/data
+      - ./config.yaml:/config.yaml:ro
+      - ./registration-token:/run/secrets/registration-token:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - kind
+
+volumes:
+  runner-data:
+
+networks:
+  kind:
+    external: true

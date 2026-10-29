@@ -1,0 +1,80 @@
+{
+  "verified_at_utc": "2026-10-29T13:26:12.251866+00:00",
+  "operator": "agent",
+  "versions": {
+    "Garage": "2.5.0",
+    "VersityGW": "1.8.0",
+    "SeaweedFS": "4.51"
+  },
+  "cases": [
+    {
+      "backend": "SeaweedFS",
+      "key": "roundtrip/check.json",
+      "bytes": 76,
+      "sha256": "0e7e2d784c5fb2862be6e4093f8504b080ae055b2217b74dc3dcaac04c3c7672",
+      "put_get_head_list": true
+    },
+    {
+      "backend": "SeaweedFS",
+      "key": "roundtrip/demographic_features.parquet",
+      "bytes": 1440643,
+      "sha256": "ae05b4ec30229bf92504039c6df7685da9b32f6fb927720ea246b1d2f8aecd0f",
+      "put_get_head_list": true
+    },
+    {
+      "backend": "SeaweedFS",
+      "key": "roundtrip/model.pkl",
+      "bytes": 8291,
+      "sha256": "55cf850069f3e89aa1a158dd867c4377f11b6a64854ddb1025af6934ccf58c85",
+      "put_get_head_list": true
+    },
+    {
+      "backend": "Garage",
+      "key": "roundtrip/check.json",
+      "bytes": 76,
+      "sha256": "0e7e2d784c5fb2862be6e4093f8504b080ae055b2217b74dc3dcaac04c3c7672",
+      "put_get_head_list": true
+    },
+    {
+      "backend": "Garage",
+      "key": "roundtrip/demographic_features.parquet",
+      "bytes": 1440643,
+      "sha256": "ae05b4ec30229bf92504039c6df7685da9b32f6fb927720ea246b1d2f8aecd0f",
+      "put_get_head_list": true
+    },
+    {
+      "backend": "Garage",
+      "key": "roundtrip/model.pkl",
+      "bytes": 8291,
+      "sha256": "55cf850069f3e89aa1a158dd867c4377f11b6a64854ddb1025af6934ccf58c85",
+      "put_get_head_list": true
+    },
+    {
+      "backend": "VersityGW",
+      "key": "roundtrip/check.json",
+      "bytes": 76,
+      "sha256": "0e7e2d784c5fb2862be6e4093f8504b080ae055b2217b74dc3dcaac04c3c7672",
+      "put_get_head_list": true
+    },
+    {
+      "backend": "VersityGW",
+      "key": "roundtrip/demographic_features.parquet",
+      "bytes": 1440643,
+      "sha256": "ae05b4ec30229bf92504039c6df7685da9b32f6fb927720ea246b1d2f8aecd0f",
+      "put_get_head_list": true
+    },
+    {
+      "backend": "VersityGW",
+      "key": "roundtrip/model.pkl",
+      "bytes": 8291,
+      "sha256": "55cf850069f3e89aa1a158dd867c4377f11b6a64854ddb1025af6934ccf58c85",
+      "put_get_head_list": true
+    }
+  ],
+  "posix_to_s3": true,
+  "s3_to_posix": true,
+  "limits": [
+    "단일 노드 실습",
+    "성능·고가용성·S3 전체 API 검증 아님"
+  ]
+}

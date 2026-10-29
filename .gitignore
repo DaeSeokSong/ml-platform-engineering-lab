@@ -1,0 +1,56 @@
+# 로컬 환경과 캐시
+.venv/
+.venv-*/
+**/.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.local-tools/
+# 인증정보와 개인 실행 설정
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+**/.s3.env
+**/.redis-password
+**/registration-token
+*.pem
+*.key
+# 데이터·학습 산출물·실행 ID
+**/data/*
+!**/data/README.md
+**/feature_data/*
+!**/feature_data/README.md
+chapters/**/artifacts/
+**/mlruns/
+**/mlartifacts/
+**/feast-local/
+**/*.db
+**/*.db-*
+*.parquet
+*.pkl
+*.joblib
+**/latest_*_id.txt
+**/latest_*_prefix.txt
+**/latest_model_uri.txt
+**/registered_model_uri.txt
+**/first_pipeline.yaml
+**/batch_pipeline.yaml
+**/external-seaweedfs.yaml
+# 강의 원문과 임시 자료
+*.zip
+*.pdf
+*.z[0-9][0-9]
+*.bak*
+tmp/
+.DS_Store
+Thumbs.db
+
+
+.qa/
+**/.redis.env
+**/.garage.env
+**/.versity.env
+**/.comparison.env

@@ -1,0 +1,49 @@
+name: hello-joker CI
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - charts/hello-joker/values-gitops.yaml
+  workflow_dispatch:
+
+jobs:
+  test-build-update:
+    runs-on: lab
+    timeout-minutes: 15
+    permissions:
+      code: write
+    steps:
+      - name: 코드 가져오기
+        uses: builtin:checkout
+
+      - name: 의존성 설치
+        run: python -m pip install -r requirements.txt -c constraints.local.txt
+
+      - name: 테스트 실행
+        run: python -m pytest -q
+
+      - name: 서비스 이미지 빌드 및 업로드
+        run: |
+          set -eu
+          TAG="$(git rev-parse --short=8 HEAD)"
+          IMAGE="localhost:5001/hello-joker:$TAG"
+          docker build -f Dockerfile.practice -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "업로드한 이미지: $IMAGE"
+
+      - name: Git 배포 정의 갱신
+        run: |
+          set -eu
+          TAG="$(git rev-parse --short=8 HEAD)"
+          sed -i -E "s|^  tag:.*$|  tag: \"$TAG\"|" charts/hello-joker/values-gitops.yaml
+          git config user.name "gitea-actions"
+          git config user.email "gitea-actions@localhost"
+          git add charts/hello-joker/values-gitops.yaml
+          if git diff --cached --quiet; then
+            echo "이미 같은 이미지 태그입니다."
+          else
+            git commit -m "Deploy image $TAG [skip ci]"
+            git push origin HEAD:main
+          fi

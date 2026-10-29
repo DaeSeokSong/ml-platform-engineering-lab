@@ -1,0 +1,9 @@
+replicaCount: 3
+
+image:
+  repository: localhost:5001/hello-joker
+  tag: "09878b9a"
+  pullPolicy: IfNotPresent
+
+appEnv: gitops
+existingSecret: hello-joker-secret

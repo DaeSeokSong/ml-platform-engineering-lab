@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: s3-auth-check
+  namespace: kubeflow
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: check
+      image: python:3.11-bookworm
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      envFrom:
+        - secretRef:
+            name: feature-s3-credentials
+      env:
+        - name: HOME
+          value: /tmp
+        - name: AWS_EC2_METADATA_DISABLED
+          value: "true"
+      command: ["/bin/sh", "-ec"]
+      args:
+        - |
+          python -m pip install --quiet --disable-pip-version-check \
+            --target /tmp/deps boto3==1.35.36
+          PYTHONPATH=/tmp/deps python -u /code/check_s3_from_pod.py
+      volumeMounts:
+        - name: code
+          mountPath: /code
+          readOnly: true
+  volumes:
+    - name: code
+      configMap:
+        name: s3-check-code

@@ -1,0 +1,4 @@
+runner:
+  capacity: 1
+container:
+  network: kind

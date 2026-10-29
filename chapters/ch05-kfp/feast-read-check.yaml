@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: feast-read-check
+  namespace: kubeflow
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: check
+      image: localhost:5001/ml-platform-batch:week02-v1
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]
+      envFrom:
+        - secretRef:
+            name: feature-s3-credentials
+      env:
+        - name: AWS_EC2_METADATA_DISABLED
+          value: "true"
+      command: ["python", "/code/check_feast_from_pod.py"]
+      volumeMounts:
+        - name: code
+          mountPath: /code
+          readOnly: true
+  volumes:
+    - name: code
+      configMap:
+        name: feast-check-code

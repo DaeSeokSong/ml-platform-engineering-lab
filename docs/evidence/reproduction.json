@@ -1,0 +1,43 @@
+{
+  "verified_at_utc": "2026-10-29T13:36:37.734639+00:00",
+  "operator": "agent",
+  "isolated_workdir": true,
+  "shared_existing_services": [
+    "Redis",
+    "SeaweedFS",
+    "검증된 배치 이미지"
+  ],
+  "isolated_projects_and_buckets": true,
+  "checks": [
+    "repro_buckets",
+    "feast_apply",
+    "query_historical_checked.py",
+    "materialize_features.py",
+    "predict_online.py",
+    "upload_features.py",
+    "feast_s3_setup.py",
+    "compare_feast_sources.py",
+    "materialize_s3.py"
+  ],
+  "data_rows": 30162,
+  "validation_rows": 6033,
+  "max_probability_reload_difference": 0.0,
+  "metrics": {
+    "DecisionTree": {
+      "accuracy": 0.8178,
+      "auc": 0.8442
+    },
+    "RandomForest": {
+      "accuracy": 0.825,
+      "auc": 0.8747
+    },
+    "XGBoost": {
+      "accuracy": 0.8308,
+      "auc": 0.8814
+    }
+  },
+  "limits": [
+    "기존 Docker·클러스터를 공유한 신규 작업 폴더 재현",
+    "빈 PC의 전체 설치 재실행은 아님"
+  ]
+}

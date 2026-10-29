@@ -1,0 +1,23 @@
+{
+  "verified_at_utc": "2026-10-29T13:34:26.325281+00:00",
+  "operator": "agent",
+  "rows": 3,
+  "predictions": [
+    {
+      "prediction": 1,
+      "probability_gt_50k": 0.6101694915254238,
+      "model_uri": "models:/income-classifier-tree/1"
+    },
+    {
+      "prediction": 0,
+      "probability_gt_50k": 0.1418988648090815,
+      "model_uri": "models:/income-classifier-tree/1"
+    },
+    {
+      "prediction": 0,
+      "probability_gt_50k": 0.0347482724580454,
+      "model_uri": "models:/income-classifier-tree/1"
+    }
+  ],
+  "note": "개인 ID·실행별 경로를 제외한 실제 저장 결과"
+}

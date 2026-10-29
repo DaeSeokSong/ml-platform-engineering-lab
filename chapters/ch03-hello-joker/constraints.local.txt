@@ -1,0 +1,3 @@
+# Starlette 0.27.0 TestClient passes app= to httpx.Client.
+# HTTPX 0.28 removed that argument; use an explicit compatible version.
+httpx==0.24.1
